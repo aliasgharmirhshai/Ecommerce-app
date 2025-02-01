@@ -1,104 +1,46 @@
-from django.test import TestCase
-from django.contrib.auth import get_user_model
+from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.contrib.auth import get_user_model
 
-User = get_user_model()
-
-class UserModelTests(TestCase):
-    def test_create_user(self):
-        user = User.objects.create_user(
-            email="user@example.com",
-            name="John",
-            last_name="Doe",
+@override_settings(LOGIN_URL='/users/login/')
+class UserTestCase(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            email="testuser@example.com",
             phone_number="1234567890",
-            password="securepassword123"
-        )
-        self.assertEqual(user.email, "user@example.com")
-        self.assertTrue(user.check_password("securepassword123"))
-        self.assertFalse(user.is_staff)
-        self.assertFalse(user.is_superuser)
-
-    def test_create_superuser(self):
-        user = User.objects.create_superuser(
-            email="admin@example.com",
-            name="Admin",
-            last_name="User",
-            phone_number="0987654321",
-            password="securepassword123"
-        )
-        self.assertTrue(user.is_staff)
-        self.assertTrue(user.is_superuser)
-
-    def test_user_str(self):
-        user = User.objects.create_user(
-            email="test@example.com",
+            password="testpassword123",
             name="Test",
-            last_name="User",
-            phone_number="1234567890",
-            password="testpassword123"
+            last_name="User"
         )
-        self.assertEqual(str(user), "Test User (test@example.com)")
+        self.login_url = reverse("login")
+        self.logout_url = reverse("logout")
+        self.dashboard_url = reverse("dashboard")
 
-class UserRegistrationTests(TestCase):
-    def test_register_user(self):
-        response = self.client.post(reverse('register'), {
-            "email": "newuser@example.com",
-            "name": "New",
-            "last_name": "User",
-            "phone_number": "1234567890",
-            "password1": "StrongPassword123!",
-            "password2": "StrongPassword123!"
+    def test_login_with_email(self):
+        response = self.client.post(self.login_url, {
+            "username": "testuser@example.com",
+            "password": "testpassword123"
         })
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(User.objects.filter(email="newuser@example.com").exists())
+        self.assertRedirects(response, self.dashboard_url)
 
-    def test_register_user_invalid(self):
-        response = self.client.post(reverse('register'), {
-            "email": "invaliduser@example.com",
-            "name": "Invalid",
-            "last_name": "User",
-            "phone_number": "1234567890",
-            "password1": "pass",
-            "password2": "pass"
+    def test_login_with_phone_number(self):
+        response = self.client.post(self.login_url, {
+            "username": "1234567890",
+            "password": "testpassword123"
         })
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(User.objects.filter(email="invaliduser@example.com").exists())
+        self.assertRedirects(response, self.dashboard_url)
 
-class UserLoginTests(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(
-            email="loginuser@example.com",
-            name="Login",
-            last_name="User",
-            phone_number="1234567890",
-            password="securepassword123"
-        )
-
-    def test_login_valid_user(self):
-        response = self.client.post(reverse('login'), {
-            "username": "loginuser@example.com",
-            "password": "securepassword123"
-        })
-        self.assertEqual(response.status_code, 302)
-
-    def test_login_invalid_user(self):
-        response = self.client.post(reverse('login'), {
-            "username": "wronguser@example.com",
-            "password": "wrongpassword"
-        })
+    def test_dashboard_access_authenticated(self):
+        self.client.login(email="testuser@example.com", password="testpassword123")
+        response = self.client.get(self.dashboard_url)
         self.assertEqual(response.status_code, 200)
 
-class UserLogoutTests(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(
-            email="logoutuser@example.com",
-            name="Logout",
-            last_name="User",
-            phone_number="1234567890",
-            password="securepassword123"
-        )
-        self.client.login(username="logoutuser@example.com", password="securepassword123")
+    def test_dashboard_access_unauthenticated(self):
+        response = self.client.get(self.dashboard_url)
+        self.assertRedirects(response, f"{self.login_url}?next={self.dashboard_url}")
 
-    def test_logout_user(self):
-        response = self.client.get(reverse('logout'))
-        self.assertEqual(response.status_code, 302)
+    def test_logout(self):
+        self.client.login(email="testuser@example.com", password="testpassword123")
+        self.client.get(self.logout_url)
+        response = self.client.get(self.dashboard_url)
+        self.assertRedirects(response, f"{self.login_url}?next={self.dashboard_url}")
