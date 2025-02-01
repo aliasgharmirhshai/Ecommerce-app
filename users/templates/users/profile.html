@@ -1,0 +1,6 @@
+<form method="post">
+    {% csrf_token %}
+    <label>Phone Number:</label>
+    <input type="text" name="phone_number" value="{{ profile.phone_number }}">
+    <button type="submit">Update</button>
+</form>

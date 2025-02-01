@@ -1,0 +1,12 @@
+<form method="post">
+    {% csrf_token %}
+    <input type="text" name="address_line_1" placeholder="Address Line 1" required>
+    <input type="text" name="address_line_2" placeholder="Address Line 2">
+    <input type="text" name="city" placeholder="City" required>
+    <input type="text" name="state" placeholder="State" required>
+    <input type="text" name="postal_code" placeholder="Postal Code" required>
+    <input type="text" name="country" placeholder="Country" required>
+    <input type="checkbox" name="is_shipping"> Shipping Address
+    <input type="checkbox" name="is_billing"> Billing Address
+    <button type="submit">Add Address</button>
+</form>

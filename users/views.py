@@ -1,29 +1,37 @@
-from django.shortcuts import render
-from django.contrib.auth import login, authenticate
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login, logout
 from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
+from django.contrib.auth.views import LoginView, LogoutView
+from .forms import UserRegistrationForm
 
-def register(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('home')  # Redirect to a home page or dashboard
-    else:
-        form = UserCreationForm()
-    return render(request, 'users/register.html', {'form': form})
+class UserRegisterView(CreateView):
+    form_class = UserRegistrationForm
+    success_url = reverse_lazy('login')
+    template_name = 'users/register.html'
 
-def login_view(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('home')  # Redirect to a home page or dashboard
-    return render(request, 'users/login.html')
+class UserLoginView(LoginView):
+    template_name = 'users/login.html'
 
-def logout_view(request):
-    logout(request)
-    return redirect('home')  # Redirect to a home page or login page
+class UserLogoutView(LogoutView):
+    next_page = 'login'
+    http_method_names = ['get', 'post']
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        if response.status_code == 200:
+            return redirect(self.next_page)
+        return response
+
+
+
+
+
+
+
+
+
+
+
+
+
