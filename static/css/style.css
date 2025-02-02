@@ -1,0 +1,86 @@
+/* Basic Styling */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.filters {
+    margin-bottom: 20px;
+}
+
+.filters input, .filters select {
+    padding: 8px;
+    margin-right: 10px;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.product-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    text-align: center;
+}
+
+.product-card img {
+    max-width: 100%;
+    height: auto;
+}
+
+.product-card h3 {
+    margin: 10px 0;
+}
+
+.product-card .price {
+    font-weight: bold;
+    color: #333;
+}
+
+.product-card .rating {
+    color: #f39c12;
+}
+
+.pagination {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination a {
+    margin: 0 5px;
+    text-decoration: none;
+    color: #333;
+}
+
+.pagination .current {
+    font-weight: bold;
+}
+
+.product-detail {
+    display: flex;
+    gap: 20px;
+}
+
+.product-detail .product-image {
+    flex: 1;
+}
+
+.product-detail .product-info {
+    flex: 2;
+}
+
+.product-detail .product-info .price {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.product-detail .product-info button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+}

@@ -1,0 +1,25 @@
+<!-- products_by_category.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>Products in {{ category.name }}</h1>
+    <div class="product-grid">
+        {% for product in products %}
+            <div class="product-card">
+                <a href="{% url 'product_detail' product.slug %}">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    <h3>{{ product.name }}</h3>
+                    <p>{{ product.description|truncatewords:20 }}</p>
+                    <p class="price">${{ product.price }}</p>
+                    {% if product.rating %}
+                        <p class="rating">Rating: {{ product.rating }}/5</p>
+                    {% endif %}
+                </a>
+            </div>
+        {% empty %}
+            <p>No products found in this category.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
