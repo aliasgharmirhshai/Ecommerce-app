@@ -14,10 +14,14 @@
             {% if product.rating %}
                 <p class="rating">Rating: {{ product.rating }}/5</p>
             {% endif %}
-            <p>Category: <a href="{% url 'products_by_category' product.category.slug %}">{{ product.category.name }}</a></p>
+            <p>Category: <a href="{% url 'products:products_by_category' product.category.slug %}">{{ product.category.name }}</a></p>
             <p>Stock: {{ product.stock }}</p>
             <button>Add to Cart</button>
         </div>
     </div>
+    <form action="{% url 'orders:add_to_cart' product.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Add to Cart</button>
+    </form>
 </div>
 {% endblock %}

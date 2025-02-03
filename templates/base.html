@@ -12,7 +12,7 @@
     <header>
         <nav>
             {% comment %} <a href="{% url '/' %}">Home</a> {% endcomment %}
-            <a href="{% url 'product_list' %}">Products</a>
+            <a href="{% url 'products:product_list' %}">Products</a>
             {% if user.is_authenticated %}
                 <a href="{% url 'dashboard' %}">Profile</a>
                 <a href="{% url 'logout' %}">Logout</a>
@@ -38,6 +38,17 @@
         <!-- Content will be overridden by child templates -->
         {% endblock %}
     </main>
+
+    <!-- Include this in your base template or product detail template -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
     <footer>
         <p>&copy; 2023 My E-Commerce App</p>

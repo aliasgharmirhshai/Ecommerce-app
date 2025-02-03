@@ -1,29 +1,20 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from .models import Order
+from django.shortcuts import get_object_or_404, redirect
+from django.views import View
+from django.contrib import messages
+from .models import Cart, CartItem
+from products.models import Product
 
-def order_list(request):
-    orders = Order.objects.all()
-    return render(request, 'orders/order_list.html', {'orders': orders})
+class AddToCartView(View):
+    def post(self, request, product_id):
+        product = get_object_or_404(Product, id=product_id)
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        cart_item, item_created = CartItem.objects.get_or_create(cart=cart, product=product)
 
-def order_detail(request, id):
-    order = Order.objects.get(id=id)
-    return render(request, 'orders/order_detail.html', {'order': order})
+        if not item_created:
+            cart_item.quantity += 1
+            cart_item.save()
+            messages.success(request, f"Updated quantity for {product.name} in your cart.")
+        else:
+            messages.success(request, f"Added {product.name} to your cart.")
 
-def create_order(request):
-    if request.method == 'POST':
-        # Logic to create an order
-        return HttpResponse("Order created!")
-    return render(request, 'orders/create_order.html')
-
-def update_order(request, order_id):
-    order = Order.objects.get(id=order_id)
-    if request.method == 'POST':
-        # Logic to update the order
-        return HttpResponse("Order updated!")
-    return render(request, 'orders/update_order.html', {'order': order})
-
-def delete_order(request, order_id):
-    order = Order.objects.get(id=order_id)
-    order.delete()
-    return HttpResponse("Order deleted!")
+        return redirect('products:product_detail', product_id=product_id)

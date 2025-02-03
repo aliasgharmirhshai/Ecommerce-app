@@ -3,6 +3,8 @@ from django.views.generic import ListView, DetailView
 from django.db.models import Q
 from .models import Product, Category
 from .forms import ProductFilterForm
+from django.views.generic.detail import DetailView
+from django.shortcuts import get_object_or_404
 
 class ProductListView(ListView):
     model = Product
@@ -43,7 +45,9 @@ class ProductDetailView(DetailView):
     model = Product
     template_name = 'products/product_detail.html'
     context_object_name = 'product'
-    slug_field = 'slug'
+
+    def get_object(self):
+        return get_object_or_404(Product, id=self.kwargs['product_id'])
 
 class CategoryProductListView(ProductListView):
     def get_queryset(self):
