@@ -1,11 +1,23 @@
-<!-- users/templates/users/dashboard.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard</title>
-</head>
-<body>
-    <h1>Welcome, {{ user.username }}!</h1>
-    <a href="{% url 'logout' %}">Logout</a>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Welcome, {{ user.name }} {{ user.last_name }}</h2>
+<table>
+    <tr>
+        <th>Name:</th>
+        <td>{{ user.name }}</td>
+    </tr>
+    <tr>
+        <th>Last Name:</th>
+        <td>{{ user.last_name }}</td>
+    </tr>
+    <tr>
+        <th>Email:</th>
+        <td>{{ user.email }}</td>
+    </tr>
+    <tr>
+        <th>Phone Number:</th>
+        <td>{{ user.phone_number }}</td>
+    </tr>
+</table>
+{% endblock %}

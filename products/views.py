@@ -49,6 +49,7 @@ class ProductDetailView(DetailView):
     def get_object(self):
         return get_object_or_404(Product, id=self.kwargs['product_id'])
 
+
 class CategoryProductListView(ProductListView):
     def get_queryset(self):
         category_slug = self.kwargs['slug']

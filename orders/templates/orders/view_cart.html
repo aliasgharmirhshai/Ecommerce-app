@@ -1,29 +1,143 @@
 {% extends 'base.html' %}
-{% load cart_extras %}
 
 {% block content %}
-<div class="container">
-    <h1>Your Cart</h1>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in cart_items %}
-            <tr>
-                <td>{{ item.product.name }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>${{ item.product.price }}</td>
-                <td>${{ item.product.price|multiply:item.quantity }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <h3>Total Price: ${{ total_price }}</h3>
-</div>
+<h1>Your Shopping Cart</h1>
+
+{% if cart_items %}
+<table>
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in cart_items %}
+        <tr data-item-id="{{ item.id }}">
+            <td>{{ item.product.name }}</td>
+            <td>
+                <input type="number" class="quantity-input" value="{{ item.quantity }}" min="1">
+            </td>
+            <td>${{ item.product.price }}</td>
+            <td class="total-price">${{ item.get_total_price }}</td>
+            <td>
+                <button class="update-btn">Update</button>
+                <button class="remove-btn">Remove</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="3"><strong>Total</strong></td>
+            <td><strong id="cart-total">${{ total_price }}</strong></td>
+            <td>
+                <button class="save-cart-btn">Save Cart</button>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+{% else %}
+<p>Your cart is empty.</p>
+{% endif %}
+
+<input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+<input type="hidden" id="update-cart-url" value="{% url 'orders:update_cart' %}">
+<input type="hidden" id="save-cart-url" value="{% url 'orders:save_cart' %}">
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const csrfToken = document.getElementById('csrf_token').value;
+        const updateCartUrl = document.getElementById('update-cart-url').value;
+        const saveCartUrl = document.getElementById('save-cart-url').value;
+    
+        document.addEventListener('click', function (event) {
+            const target = event.target;
+    
+            // 🟢 Update Button Clicked
+            if (target.classList.contains('update-btn')) {
+                const row = target.closest('tr');
+                const itemId = row.getAttribute('data-item-id');
+                const quantity = row.querySelector('.quantity-input').value;
+    
+                fetch(updateCartUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        item_id: itemId,
+                        action: 'update',
+                        quantity: quantity
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        row.querySelector('.total-price').textContent = `$${data.new_total}`;
+                        document.getElementById('cart-total').textContent = `$${data.cart_total}`;
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+    
+            // 🔴 Remove Button Clicked
+            if (target.classList.contains('remove-btn')) {
+                const row = target.closest('tr');
+                const itemId = row.getAttribute('data-item-id');
+    
+                fetch(updateCartUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        item_id: itemId,
+                        action: 'remove'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        row.remove();
+                        document.getElementById('cart-total').textContent = `$${data.cart_total}`;
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+    
+            // 🟡 Save Cart Button Clicked
+            if (target.classList.contains('save-cart-btn')) {
+                fetch(saveCartUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Cart saved successfully!');
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        });
+    });
+    </script>
+    
 {% endblock %}

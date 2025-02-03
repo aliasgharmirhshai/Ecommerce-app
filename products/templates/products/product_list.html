@@ -8,7 +8,7 @@
     
     <!-- Search and Filters -->
     <div class="filters">
-        <form method="get" action="{% url 'product_list' %}">
+        <form method="get" action="{% url 'products:product_list' %}">
             <input type="text" name="search" placeholder="Search products..." value="{{ request.GET.search }}">
             <select name="category">
                 <option value="">All Categories</option>
@@ -29,7 +29,9 @@
     <div class="product-grid">
         {% for product in products %}
             <div class="product-card">
-                <a href="{% url 'product_detail' product.slug %}">
+                <a href="{% url 'products:product_detail' product.id %}">
+
+
                     <img src="{{ product.image.url }}" alt="{{ product.name }}">
                     <h3>{{ product.name }}</h3>
                     <p>{{ product.description|truncatewords:20 }}</p>
